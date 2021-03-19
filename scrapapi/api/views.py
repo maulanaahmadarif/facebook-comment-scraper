@@ -53,7 +53,7 @@ def index(request):
   # INSTALATION => https://www.selenium.dev/documentation/en/webdriver/driver_requirements/
   # CHROME => https://sites.google.com/a/chromium.org/chromedriver/downloads
   driver = webdriver.Chrome()
-  
+
   driver.get('https://web.facebook.com/story.php?story_fbid=3660159894068444&id=583729738378157&_rdc=1&_rdr')
 
   # REMOVE POPUP
@@ -174,7 +174,7 @@ def index(request):
     'data': datas
   }
 
-  with open('data.json', 'w') as outfile:
+  with open('response-post.json', 'w') as outfile:
       json.dump(datas, outfile)
 
 
