@@ -1,40 +1,20 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
-
 import json
 import time
 
-def commentScrap(dom, idCounter):
-  authorComment = dom.find(class_="_6qw4")
-  textComment = dom.select_one("._3l3x > span")
-  attachmentComment = dom.select_one("._2txe img")
-  commentDate = dom.select_one("a._6qw7 abbr")
-
-  tComment = ''
-  aComment = ''
-
-  if textComment is not None:
-    tComment = textComment.text
-  else:
-    tComment = ''
-  
-  if attachmentComment is not None:
-    aComment = attachmentComment.get('src')
-  else:
-    aComment = ''
-
-  return idCounter, authorComment.text, commentDate.get("data-utime"), tComment, aComment
-
-
+from api.utils.helper import isValidURL
+from api.utils.response import getResponse
+from api.utils.scrape import commentScrap
 
 def index(request):
   limit = None
   offset = 0
   reply = False
+  url = None
 
   if 'limit' in request.GET:
     limit = int(request.GET['limit']) if request.GET['limit'].isnumeric() else None
@@ -45,6 +25,23 @@ def index(request):
   if 'reply' in request.GET:
     reply = bool(request.GET['reply'] == 'true')
 
+  if 'url' in request.GET:
+    url = request.GET['url']
+    if not isValidURL(url):
+      context = {
+        'message': 'url is not valid',
+        'status': 400
+      }
+      response = getResponse(400, context)
+      return response
+  else:
+    context = {
+      'message': 'url is empty',
+      'status': 400
+    }
+    response = getResponse(400, context)
+    return response
+
   # DEPENDING ON OS YOU ARE WORKING,
   # PLEASE DOWNLOAD WEBDRIVER BASE ON OS
   # AND MAKE SURE THE VERSION IS MATCHING WITH
@@ -54,7 +51,7 @@ def index(request):
   # CHROME => https://sites.google.com/a/chromium.org/chromedriver/downloads
   driver = webdriver.Chrome()
 
-  driver.get('https://web.facebook.com/story.php?story_fbid=3660159894068444&id=583729738378157&_rdc=1&_rdr')
+  driver.get(url)
 
   # REMOVE POPUP
   container = driver.find_element_by_class_name(u"_5hn6")
@@ -109,7 +106,9 @@ def index(request):
       
       comment = {}
 
-      soup = BeautifulSoup(commentList[n].get_attribute('innerHTML'), 'html.parser')
+      cList = commentList[n]
+
+      soup = BeautifulSoup(cList.get_attribute('innerHTML'), 'html.parser')
 
       id, author, date, text, attachment = commentScrap(soup, idCounter)
 
@@ -167,8 +166,8 @@ def index(request):
 
   jsonResp = {
     'meta': {
-      'limit': limit,
-      'offset': offset,
+      'status': 200,
+      'total': len(datas),
       'reply': reply
     },
     'data': datas
@@ -177,5 +176,5 @@ def index(request):
   with open('response-post.json', 'w') as outfile:
       json.dump(datas, outfile)
 
-
-  return JsonResponse(jsonResp)
+  response = getResponse(200, jsonResp)
+  return response
