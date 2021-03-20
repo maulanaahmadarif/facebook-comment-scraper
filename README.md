@@ -23,18 +23,22 @@ With all the packages installed, now lets run the app
  1. `cd scrapapi` 
  2. Run the server `python manage.py runserver` it should running on port `8000` on your localhost
  
-> Currently, the webpage URL is hardcoded
-
-Now, open `http://localhost:8000/api`, hit enter and it should open new browser depending on your webdriver selection, and the scraper is starting
+Now, open `http://localhost:8000/api?url={url}`, hit enter and it should open new browser depending on your webdriver selection, and the scraper is starting
 
 # ![Automate Chrome](automateChrome.png)
 
 > Don't prevent any click event, it will break the scraper
 
-The API has 3 parameter as listed below:
+The API has 4 parameter as listed below:
 
 | query | type | defaultValue | description
 |--|--|--|--|
-| limit | `Int` | `null` |  |
-| offset | `Int` | `0` |  |
-| reply | `Boolean` | `false` | if `true` the response will display the comment replies |
+| limit | `Int (optional)` | `null` |  |
+| offset | `Int (optional)` | `0` |  |
+| reply | `Boolean (optional)` | `false` | if `true` the response will display the comment replies |
+| url | `String (required)` | `null` | Facebook post url (must be encoded), you can encode [here](https://www.urlencoder.org/) |
+
+### Facebook Post Example URLs
+ 1. [https://web.facebook.com/JustinBieber/posts/10159627484088888](https://web.facebook.com/JustinBieber/posts/10159627484088888)
+ 2. [https://web.facebook.com/story.php?story_fbid=3660159894068444&id=583729738378157&_rdc=1&_rdr](https://web.facebook.com/story.php?story_fbid=3660159894068444&id=583729738378157&_rdc=1&_rdr)
+ 3. [https://web.facebook.com/PlayStationAsia/posts/4106816132684361](https://web.facebook.com/PlayStationAsia/posts/4106816132684361)
